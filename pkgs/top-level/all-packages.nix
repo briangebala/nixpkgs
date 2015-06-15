@@ -4224,7 +4224,7 @@ let
 
   self = callPackage_i686 ../development/interpreters/self { };
 
-  spark = callPackage ../applications/networking/cluster/spark { };
+  #spark = callPackage ../applications/networking/cluster/spark { };
 
   spidermonkey = callPackage ../development/interpreters/spidermonkey { };
   spidermonkey_1_8_0rc1 = callPackage ../development/interpreters/spidermonkey/1.8.0-rc1.nix { };
@@ -13013,5 +13013,7 @@ let
 
   ### Custom packages.
   nodejs = callPackage ../ai2/nodejs {};
+  s2-pipeline = callPackage ../ai2/s2-pipeline {};
+  spark = callPackage ../ai2/spark {};
 
 }; in self; in pkgs
