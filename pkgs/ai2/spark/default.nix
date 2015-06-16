@@ -9,17 +9,11 @@ let
 in 
 stdenv.mkDerivation rec {
   name = "spark-${version}";
-  version = "1.2.0";
+  version = "1.4.0";
   
   src = fetchurl {
-    # url = "http://d3kbcqa49mib13.cloudfront.net/spark-1.2.2-bin-hadoop2.4.tgz";
-    # sha256 = "1cxl24kr90sy1sygxmrd3ks0cy2bwsssgk26j0mx1mmdabnx2h73";
-    # url = "http://d3kbcqa49mib13.cloudfront.net/spark-1.2.1-bin-hadoop2.4.tgz";
-    # sha256 = "0m5ljas24l8q9j26hi64cri1zr905rg6xa8rf7war41hggv8qqcf";
-    # url = "http://d3kbcqa49mib13.cloudfront.net/spark-1.2.0-bin-hadoop2.4.tgz";
-    # sha256 = "1qwzgl69ivbpc6fdij0db9vkr0ig4qlhkgfydb8vqr235rqcn886";
-    url = "http://ai2-s2.s3.amazonaws.com/third-party/spark-1.2.0-bin-hadoop2.4-scala2.11.tgz";
-    sha256 = "0bl6c96zw4v7yqwjgy4m6k6ch7dsx23h3hw6cs7lk596bjnxs4hw";
+    url = "http://ai2-s2.s3.amazonaws.com/third-party/spark-${version}-bin-hadoop2.4-scala2.11.tgz";
+    sha256 = "19dwcrdd79jdp046c8fpy616hfvh2vyw676jhrjqa264xj37pmnd";
   };
 
   buildInputs = [ makeWrapper jre pythonPackages.python pythonPackages.numpy ];
