@@ -4,14 +4,14 @@ assert stdenv.isLinux;
 
 stdenv.mkDerivation rec {
   name = "influxdb-${version}";
-  version = "0.8.2";
+  version = "0.8.8";
   arch = if stdenv.system == "x86_64-linux" then "amd64" else "386";
 
   src = fetchurl {
     url = "http://s3.amazonaws.com/influxdb/${name}.${arch}.tar.gz";
-    sha256 = if arch == "amd64" then
-        "0m27agjf9v76w5xms8w3z91k4hxw832nxqr030qzqxynwbxj0vg6" else
-        "0bdjpdq4yhfsmvl756xhkd1d8565d19g66l5rlymksc71ps8kbj6";
+    sha1 = if arch == "amd64" then
+        "652a71472354222e3f73ff09baef13424e9c78ea" else
+        "a8e875ea26667dc000f7232e5cd594ab872ad277";
   };
 
   buildInputs = [ makeWrapper ];
@@ -23,7 +23,7 @@ stdenv.mkDerivation rec {
         --prefix LD_LIBRARY_PATH : "${stdenv.gcc.gcc}/lib:${stdenv.gcc.gcc}/lib64:${zlib}/lib:${bzip2}/lib"
 
     mkdir -p $out/share/influxdb
-    cp -R admin scripts config.toml $out/share/influxdb
+    cp -R scripts config.toml $out/share/influxdb
   '';
 
   meta = with stdenv.lib; {
