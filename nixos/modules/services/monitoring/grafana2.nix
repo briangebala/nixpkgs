@@ -251,6 +251,20 @@ in {
       };
     };
 
+    dashboards = {
+      enable = mkOption {
+        description = "Whether to enable loading of dashboard json files";
+        default = true;
+        type = types.bool;
+      };
+
+      json = mkOption {
+        description = "A list of dashboard JSON strings";
+        default = [];
+        type = types.listOf types.str;
+      };
+    };
+
     datasource = {
       name = mkOption {
         description = "The name of the datasource to create, if any";
@@ -309,9 +323,11 @@ in {
         ExecStart = "${cfg.package}/bin/grafana-server --config ${cfgFile} web";
         WorkingDirectory = cfg.package;
       };
-      postStart = import ./setup.nix {
+
+      postStart = import ./grafana2-setup.nix {
         config = cfg;
         inherit pkgs;
+        inherit lib;
       };
     };
   };
