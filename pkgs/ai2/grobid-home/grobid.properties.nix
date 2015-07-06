@@ -36,7 +36,7 @@ grobid.mysql_db_name=crossref
 #------------------------------------------------------
 
 #-------------------- start: runtime --------------------
-grobid.crf.engine=wapiti
+grobid.crf.engine=ai2
 #grobid.crf.engine=crfpp
 
 #number of threads for training the crfpp models
