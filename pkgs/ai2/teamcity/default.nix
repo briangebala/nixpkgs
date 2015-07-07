@@ -1,6 +1,5 @@
 { stdenv, makeWrapper, writeTextFile, jre, ... }:
 let
-  teamcityOutputDir = "/opt/teamcity";
   log4jXml = writeTextFile {
     name = "log4j.xml";
     text = ''
@@ -57,17 +56,8 @@ stdenv.mkDerivation rec {
     cp ${log4jXml} $out/conf/teamcity-server-log4j.xml
     cp ${serverXml} $out/conf/server.xml
     cp ${teamcityServer} $out/bin/teamcity-server.sh
-    cp ${catalinaSh} $out/bin/catalina.sh    
-
-    wrapProgram $out/bin/teamcity-server.sh \
-    --set JAVA_HOME "${jre}" \
-    --set CATALINA_TMPDIR "/opt/teamcity" \
-    --set TEAMCITY_CATALINA_HOME $out \
-    --set TEAMCITY_LOGS "/opt/teamcity" \
-    --set CATALINA_OUT "/opt/teamcity/catalina.out" \
-    --set CATALINA_PID "/opt/teamcity/catalina.pid" \
-    --add-flags start
-   '';
+    cp ${catalinaSh} $out/bin/catalina.sh
+  '';
   
   meta = with stdenv.lib; {
     homepage = "https://www.jetbrains.com/teamcity/";

@@ -11,16 +11,20 @@ in
     services.teamcity = {
       enable = mkOption {
         default = false;
-        description = "
-          Enable TeamCity.
-        ";
+        description = "Whether to enable TeamCity.";
+	type = types.bool;
+      };
+
+      heapSize = mkOption {
+        default = "512m";
+	description = "Max heap size for the TeamCity Java process.";
+	type = types.str;
       };
 
       stateDir = mkOption {
         default = "/opt/teamcity";
-        description = "
-          Directory containing TeamCity runtime and log files.
-        ";
+        description = "Directory containing TeamCity runtime and log files.";
+	type = types.str;
       };
     };
   };
@@ -29,33 +33,41 @@ in
   
     systemd.services.teamcity = {
       description = "TeamCity";
+
       after = [ "network-interfaces.target" ];
       wantedBy = [ "multi-user.target" ];
 
-#    environment = {
-#      CATALINA_OUT = "${cfg.stateDir}/catalina.out";
-#      CATALINA_TMPDIR = "${cfg.stateDir}";
-#      TEAMCITY_LOGS = "${cfg.stateDir}";
-#      TEAMCITY_CATALINA_HOME = "${pkgs.teamcity}";
-#    };
-      preStart =
-        ''
-          mkdir -p ${cfg.stateDir}/work
-	  cp -r ${pkgs.teamcity}/webapps ${cfg.stateDir}
-          chmod -R 777 ${cfg.stateDir}
-          chown -R teamcity:users ${cfg.stateDir}
-        '';
+      preStart = ''
+        mkdir -p ${cfg.stateDir}/work
+        cp -r ${pkgs.teamcity}/webapps ${cfg.stateDir}
+	chmod -R u+rw *
+        chown -R teamcity:users ${cfg.stateDir}
+      '';
+
       serviceConfig = {
         User = "teamcity";
         WorkingDirectory = cfg.stateDir;
         PermissionsStartOnly = true;
-        ExecStart = "${pkgs.teamcity}/bin/teamcity-server.sh start";
+        ExecStart = ''
+          ${pkgs.jre}/bin/java \
+	  -Djava.util.logging.config.file=${pkgs.teamcity}/conf/logging.properties \
+	  -Djava.util.logging.manager=org.apache.juli.ClassLoaderLogManager \
+	  -server \
+	  -Xmx${cfg.heapSize} \
+	  -XX:MaxPermSize=270m \
+	  -Dlog4j.configuration=file:${pkgs.teamcity}/conf/teamcity-server-log4j.xml \
+	  -Dteamcity_logs=${cfg.stateDir} \
+	  -Djsse.enableSNIExtension=false \
+	  -Djava.awt.headless=true \
+	  -Djava.endorsed.dirs=${pkgs.teamcity}/endorsed \
+	  -classpath ${pkgs.teamcity}/bin/bootstrap.jar:${pkgs.teamcity}/bin/tomcat-juli.jar \
+	  -Dcatalina.home=${pkgs.teamcity} \
+	  -Djava.io.tmpdir=${cfg.stateDir} \
+	  org.apache.catalina.startup.Bootstrap start
+	'';
         #ExecStop = "${pkgs.teamcity}/bin/teamcity-server.sh stop";
       };
 
-      unitConfig = {
-        RequiresMountsFor = cfg.stateDir;
-      };    
     };
     
     environment.systemPackages = [ pkgs.teamcity ];
@@ -63,8 +75,9 @@ in
     users.extraUsers = lib.singleton {
       name = "teamcity";
       description = "teamcity";
-      uid = 100981;
+      uid = 100881;
       home = cfg.stateDir;
+      createHome = true;
       extraGroups = [ "users" ];
     };
     
