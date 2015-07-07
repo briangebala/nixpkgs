@@ -13016,5 +13016,6 @@ let
   grobid-home = callPackage ../ai2/grobid-home {};
   grobid-native-libs = callPackage ../ai2/grobid-native-libs {};
   grafana2 = callPackage ../development/tools/misc/grafana2 {};
+  teamcity = callPackage ../ai2/teamcity {};
 
 }; in self; in pkgs
