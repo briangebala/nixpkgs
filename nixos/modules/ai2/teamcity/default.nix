@@ -4,6 +4,7 @@ with lib;
 
 let
   cfg = config.services.teamcity;
+  stateDir = "/opt/teamcity/server";
 in
 
 {
@@ -20,12 +21,6 @@ in
 	description = "Max heap size for the TeamCity Java process.";
 	type = types.str;
       };
-
-      stateDir = mkOption {
-        default = "/opt/teamcity";
-        description = "Directory containing TeamCity runtime and log files.";
-	type = types.str;
-      };
     };
   };
 
@@ -38,15 +33,16 @@ in
       wantedBy = [ "multi-user.target" ];
 
       preStart = ''
-        mkdir -p ${cfg.stateDir}/work
-        cp -r ${pkgs.teamcity}/webapps ${cfg.stateDir}
-	chmod -R u+rw *
-        chown -R teamcity:users ${cfg.stateDir}
+        mkdir -p ${stateDir}/work
+        cp -r ${pkgs.teamcity}/webapps ${stateDir}
+        chown -R teamcity:teamcity ${stateDir}
+	chmod -R u+rw ${stateDir}
+	chmod -R a+rX /opt
       '';
 
       serviceConfig = {
         User = "teamcity";
-        WorkingDirectory = cfg.stateDir;
+        WorkingDirectory = stateDir;
         PermissionsStartOnly = true;
         ExecStart = ''
           ${pkgs.jre}/bin/java \
@@ -56,36 +52,34 @@ in
 	  -Xmx${cfg.heapSize} \
 	  -XX:MaxPermSize=270m \
 	  -Dlog4j.configuration=file:${pkgs.teamcity}/conf/teamcity-server-log4j.xml \
-	  -Dteamcity_logs=${cfg.stateDir} \
+	  -Dteamcity_logs=${stateDir} \
 	  -Djsse.enableSNIExtension=false \
 	  -Djava.awt.headless=true \
 	  -Djava.endorsed.dirs=${pkgs.teamcity}/endorsed \
 	  -classpath ${pkgs.teamcity}/bin/bootstrap.jar:${pkgs.teamcity}/bin/tomcat-juli.jar \
 	  -Dcatalina.home=${pkgs.teamcity} \
-	  -Djava.io.tmpdir=${cfg.stateDir} \
+	  -Djava.io.tmpdir=${stateDir} \
 	  org.apache.catalina.startup.Bootstrap start
 	'';
-        #ExecStop = "${pkgs.teamcity}/bin/teamcity-server.sh stop";
       };
-
     };
     
     environment.systemPackages = [ pkgs.teamcity ];
 
-    users.extraUsers = lib.singleton {
-      name = "teamcity";
-      description = "teamcity";
-      uid = 100881;
-      home = cfg.stateDir;
+    users.extraUsers.teamcity = {
+      group = "teamcity";
+      home = stateDir;
       createHome = true;
-      extraGroups = [ "users" ];
     };
-    
-#    users.extraUsers.teamcity = {
-#      group = "teamcity";
-#      uid = config.ids.uids.teamcity;
-#    };
 
-#    users.extraGroups.teamcity.gid = config.ids.gids.teamcity;
+    users.extraGroups.teamcity = {};
+        
+#    users.extraUsers = lib.singleton {
+#      name = "teamcity";
+#      description = "teamcity";
+#      home = stateDir;
+#      createHome = true;
+#      extraGroups = [ "users" ];
+#    };
   };
 }

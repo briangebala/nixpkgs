@@ -4,7 +4,7 @@ let
     name = "log4j.xml";
     text = ''
       <configuration>
-        <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <appender name="STDOUT" class="org.apache.log4j.ConsoleAppender">
           <encoder>
             <pattern>%date{YYYY-MM-dd HH:mm:ss} %level [%thread] %logger{10} [%file:%line] %msg%n</pattern>
 	  </encoder>
@@ -29,17 +29,14 @@ let
     name="server.xml";
     text = builtins.readFile ./server.xml;
   };
-  teamcityServer = writeTextFile {
-    executable = true;
-    name="teamcity-server.sh";
-    text = builtins.readFile ./teamcity-server.sh;
+  buildAgentProperties = writeTextFile {
+    name = "buildAgent.properties";
+    text = builtins.readFile ./buildAgent.properties;
   };
-  catalinaSh = writeTextFile {
-    executable = true;
-    name="catalina.sh";
-    text = builtins.readFile ./catalina.sh;
+  buildAgentDistProperties = writeTextFile {
+    name = "buildAgent.dist.properties";
+    text = builtins.readFile ./buildAgent.dist.properties;
   };
-  
 in
 stdenv.mkDerivation rec {
   name = "teamcity-${version}";
@@ -55,8 +52,8 @@ stdenv.mkDerivation rec {
     cp ${log4jXml} $out/conf/teamcity-maintenance-log4j.xml
     cp ${log4jXml} $out/conf/teamcity-server-log4j.xml
     cp ${serverXml} $out/conf/server.xml
-    cp ${teamcityServer} $out/bin/teamcity-server.sh
-    cp ${catalinaSh} $out/bin/catalina.sh
+    cp ${buildAgentProperties} $out/buildAgent/conf/buildAgent.properties
+    cp ${buildAgentDistProperties} $out/buildAgent/conf/buildAgent.dist.properties    
   '';
   
   meta = with stdenv.lib; {

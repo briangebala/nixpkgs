@@ -34,7 +34,7 @@
                resourceName="UserDatabase"/>
       </Realm>
 
-      <Host name="localhost" appBase="/opt/teamcity/webapps" workDir="/opt/teamcity/work"
+      <Host name="localhost" appBase="/opt/teamcity/server/webapps" workDir="/opt/teamcity/server/work"
             unpackWARs="true" autoDeploy="true">
       </Host>
     </Engine>
