@@ -53,7 +53,7 @@ stdenv.mkDerivation rec {
     cp ${log4jXml} $out/conf/teamcity-server-log4j.xml
     cp ${serverXml} $out/conf/server.xml
     cp ${buildAgentProperties} $out/buildAgent/conf/buildAgent.properties
-    cp ${buildAgentDistProperties} $out/buildAgent/conf/buildAgent.dist.properties    
+    cp ${buildAgentDistProperties} $out/buildAgent/conf/buildAgent.dist.properties
   '';
   
   meta = with stdenv.lib; {

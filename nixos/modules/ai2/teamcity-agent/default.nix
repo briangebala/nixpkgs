@@ -60,34 +60,38 @@ in
             credentials += Credentials("Sonatype Nexus Repository Manager",
             "utility.allenai.org",
             "${cfg.sonatypeUser}",
-           "${cfg.sonatypePassword}")
+            "${cfg.sonatypePassword}")
           '';
 	  sshConfig = builtins.toFile "config" ''Host github.com
-	    IdentityFile /opt/teamcity/agent/.ssh/git-dev
+	    IdentityFile ${stateDir}/.ssh/git-dev
 	  '';
-        in	
+        in
         ''
-	mkdir -p ${stateDir}/.ssh
-        cp ${sshConfig} ${stateDir}/.ssh/config;
-	echo "${cfg.gitPrivateKey}" > ${stateDir}/.ssh/git-dev
-	echo "${cfg.gitPublicKey}" > ${stateDir}/.ssh/git-dev.pub	
-        mkdir -p ${stateDir}/sbt
-        cp ${sbtCreds} ${stateDir}/sbt/allenai.sbt;
-        mkdir -p ${stateDir}/bin
-	if [ ! -f ${stateDir}/bin/sh ]; then
-          ln -s /bin/sh ${stateDir}/bin/sh
-	fi
-	cp ${pkgs.teamcity}/buildAgent/bin/*.sh ${stateDir}/bin
-        mkdir -p ${stateDir}/conf	
-	cp ${pkgs.teamcity}/buildAgent/conf/buildAgent.properties ${stateDir}/conf
-        mkdir -p ${stateDir}/lib
-	cp ${pkgs.teamcity}/buildAgent/lib/*.jar ${stateDir}/lib
-        mkdir -p ${stateDir}/logs	
-	chown -R teamcity-agent:teamcity-agent ${stateDir}
-	chmod -R ug+rw ${stateDir}
-	chmod -R a+rX /opt/teamcity
-	chmod -R 600 ${stateDir}/.ssh
-      '';
+          if [ ! -d ${stateDir}/.ssh ] ; then
+            mkdir -p ${stateDir}/.ssh
+            cp ${sshConfig} ${stateDir}/.ssh/config;
+            echo "${cfg.gitPrivateKey}" > ${stateDir}/.ssh/git-dev
+            echo "${cfg.gitPublicKey}" > ${stateDir}/.ssh/git-dev.pub
+
+            mkdir -p ${stateDir}/sbt
+            cp ${sbtCreds} ${stateDir}/sbt/allenai.sbt;
+
+	    mkdir -p ${stateDir}/bin
+            ln -s /bin/sh ${stateDir}/bin/sh
+          fi
+
+          cp ${pkgs.teamcity}/buildAgent/bin/*.sh ${stateDir}/bin
+          mkdir -p ${stateDir}/conf
+          cp ${pkgs.teamcity}/buildAgent/conf/buildAgent.properties ${stateDir}/conf
+          mkdir -p ${stateDir}/lib
+          cp ${pkgs.teamcity}/buildAgent/lib/*.jar ${stateDir}/lib
+          mkdir -p ${stateDir}/logs
+
+          chown -R teamcity-agent:teamcity-agent ${stateDir}
+          chmod -R ug+rw ${stateDir}
+          chmod -R a+rX /opt/teamcity
+          chmod -R 600 ${stateDir}/.ssh
+        '';
 
       serviceConfig = {
         User = "teamcity-agent";

@@ -21,6 +21,16 @@ in
 	description = "Max heap size for the TeamCity Java process.";
 	type = types.str;
       };
+
+      gitPublicKey = mkOption {
+        description = "Contents of the public SSH key file for checking out from GitHub.";
+        type = types.str;
+      };
+
+      gitPrivateKey = mkOption {
+        description = "Contents of the private SSH key file for checking out from GitHub.";
+        type = types.str;
+      };
     };
   };
 
@@ -32,13 +42,24 @@ in
       after = [ "network-interfaces.target" ];
       wantedBy = [ "multi-user.target" ];
 
-      preStart = ''
-        mkdir -p ${stateDir}/work
-        cp -r ${pkgs.teamcity}/webapps ${stateDir}
-        chown -R teamcity:teamcity ${stateDir}
-	chmod -R u+rw ${stateDir}
-	chmod -R a+rX /opt
-      '';
+      preStart =
+      let
+        sshConfig = builtins.toFile "config" ''Host github.com
+	  IdentityFile ${stateDir}/.ssh/git-dev
+        '';
+      in
+        ''
+          mkdir -p ${stateDir}/.ssh
+          cp ${sshConfig} ${stateDir}/.ssh/config;
+          echo "${cfg.gitPrivateKey}" > ${stateDir}/.ssh/git-dev
+          echo "${cfg.gitPublicKey}" > ${stateDir}/.ssh/git-dev.pub
+
+          mkdir -p ${stateDir}/work
+          cp -r ${pkgs.teamcity}/webapps ${stateDir}
+          chown -R teamcity:teamcity ${stateDir}
+          chmod -R u+rw ${stateDir}
+          chmod -R a+rX /opt
+        '';
 
       serviceConfig = {
         User = "teamcity";
