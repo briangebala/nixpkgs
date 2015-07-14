@@ -414,4 +414,6 @@
 
   # AI2 Custom Modules
   ./services/monitoring/grafana2.nix
+  ./ai2/teamcity/default.nix
+  ./ai2/teamcity-agent/default.nix
 ]
