@@ -67,15 +67,15 @@ in
 	  '';
         in
         ''
-          if [ ! -d ${stateDir}/.ssh ] ; then
-            mkdir -p ${stateDir}/.ssh
-            cp ${sshConfig} ${stateDir}/.ssh/config;
-            echo "${cfg.gitPrivateKey}" > ${stateDir}/.ssh/git-dev
-            echo "${cfg.gitPublicKey}" > ${stateDir}/.ssh/git-dev.pub
+          mkdir -p ${stateDir}/.ssh
+          cp ${sshConfig} ${stateDir}/.ssh/config;
+          echo "${cfg.gitPrivateKey}" > ${stateDir}/.ssh/git-dev
+          echo "${cfg.gitPublicKey}" > ${stateDir}/.ssh/git-dev.pub
 
-            mkdir -p ${stateDir}/sbt
-            cp ${sbtCreds} ${stateDir}/sbt/allenai.sbt;
+          mkdir -p ${stateDir}/sbt
+          cp ${sbtCreds} ${stateDir}/sbt/allenai.sbt;
 
+          if [ ! -d ${stateDir}/bin ] ; then
 	    mkdir -p ${stateDir}/bin
             ln -s /bin/sh ${stateDir}/bin/sh
           fi
@@ -90,7 +90,6 @@ in
           chown -R teamcity-agent:teamcity-agent ${stateDir}
           chmod -R ug+rw ${stateDir}
           chmod -R a+rX /opt/teamcity
-          chmod -R 600 ${stateDir}/.ssh
         '';
 
       serviceConfig = {
